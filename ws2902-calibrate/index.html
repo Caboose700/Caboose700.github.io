@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WS-2902 Barometer Adjustment Helper</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <script>
+        function calculateOffsetBasedOnElevation(con_elevation)
+        {
+            let adj_sea_level = 1013.25 * Math.pow((1 - ((0.0065 * con_elevation) / (15 + (0.0065 * con_elevation) + 273.15))), 5.257);
+            return Number(1013.25 - adj_sea_level).toFixed(1);
+        }
+
+        function calculateCurrentConsoleOffset(con_absp, con_relp)
+        {
+            return Number(con_relp - con_absp).toFixed(1);
+        }
+
+        function calculateOffsetAdjustment(desired, current)
+        {
+            if (current > desired)
+            {
+                return ['-', Number(current - desired).toFixed(1)];
+            }
+            else if (current < desired)
+            {
+                return ['+', Number(desired - current).toFixed(1)];
+            }
+            else
+            {
+                return ['|', 0];
+            }
+        }
+
+        function generateInstructions()
+        {
+            // Get Form Values
+            let console_elevation = Number(document.getElementById('consoleElevation').value);
+            let console_abs_pressure = Number(document.getElementById('consoleAbsPressure').value);
+            let console_rel_pressure = Number(document.getElementById('consoleRelPressure').value);
+            let metar_sl_pressure = Number(document.getElementById('metarSLP').value);
+
+            // Determine Offsets
+            let desired_offset_from_elevation = calculateOffsetBasedOnElevation(console_elevation);
+            let current_console_offset = calculateCurrentConsoleOffset(console_abs_pressure, console_rel_pressure);
+            let required_offset_adjustment = calculateOffsetAdjustment(desired_offset_from_elevation, current_console_offset)
+
+            // Step 1 Calculations
+            let adjusted_abs_pressure = Number(console_abs_pressure);
+            let adjusted_rel_pressure = Number(console_rel_pressure);
+
+            if (required_offset_adjustment[0] === '+')
+            {
+                adjusted_rel_pressure += Number(required_offset_adjustment[1]);
+            }
+            else if (required_offset_adjustment[0] === '-')
+            {
+                adjusted_rel_pressure -= Number(required_offset_adjustment[1]);
+            }
+
+            // Step 2 Calculations
+            let metar_difference = calculateOffsetAdjustment(metar_sl_pressure, adjusted_rel_pressure);
+            if (metar_difference[0] === '+')
+            {
+                adjusted_abs_pressure += metar_difference[1];
+            }
+            else if (metar_difference[0] === '-')
+            {
+                adjusted_abs_pressure -= metar_difference[1];
+            }
+
+            // Show Instructions
+            document.getElementById('instructions').style.display = 'block';
+
+            // Setup Step 1
+            if (required_offset_adjustment[0] === '|')
+            {
+                // No adjustments need to be made, so hide the steps.
+                document.getElementById('step1noskip').style.display = 'none';
+                document.getElementById('step1skip').style.display = 'block';
+            }
+            else
+            {
+                document.getElementById('step1noskip').style.display = 'block';
+                document.getElementById('step1skip').style.display = 'none';
+
+                // Determine if we show the instructions for incrementing or decrementing the adjustment.
+                if (required_offset_adjustment[0] === '+')
+                {
+                    document.getElementById('step1decrement').style.display = 'none';
+                    document.getElementById('step1increment').style.display = 'block';
+                    document.getElementById('step1incrementbuttontimes').innerText = (required_offset_adjustment[1] * 10).toString();
+                    document.getElementById('step1incrementoffset').innerText = required_offset_adjustment[1].toString();
+                }
+                else
+                {
+                    document.getElementById('step1increment').style.display = 'none';
+                    document.getElementById('step1decrement').style.display = 'block';
+                    document.getElementById('step1decrementbuttontimes').innerText = (required_offset_adjustment[1] * 10).toString();
+                    document.getElementById('step1decrementoffset').innerText = required_offset_adjustment[1].toString();
+                }
+
+                document.getElementById('step1adjustedrelpressure').innerText = adjusted_rel_pressure.toString();
+            }
+
+            // Setup Step 2
+            // Determine if we show the instructions for incrementing or decrementing the adjustment.
+            if (metar_difference[0] === '|')
+            {
+                // No adjustments need to be made, so hide the steps.
+                document.getElementById('step2noskip').style.display = 'none';
+                document.getElementById('step2skip').style.display = 'block';
+            }
+            else
+            {
+                document.getElementById('step2noskip').style.display = 'block';
+                document.getElementById('step2skip').style.display = 'none';
+
+                if (metar_difference[0] === '+')
+                {
+                    document.getElementById('step2decrement').style.display = 'none';
+                    document.getElementById('step2increment').style.display = 'block';
+                    document.getElementById('step2incrementbuttontimes').innerText = (metar_difference[1] * 10).toString();
+                    document.getElementById('step2incrementoffset').innerText = metar_difference[1].toString();
+                }
+                else
+                {
+                    document.getElementById('step2increment').style.display = 'none';
+                    document.getElementById('step2decrement').style.display = 'block';
+                    document.getElementById('step2decrementbuttontimes').innerText = (metar_difference[1] * 10).toString();
+                    document.getElementById('step2decrementoffset').innerText = metar_difference[1].toString();
+                }
+
+                document.getElementById('step2adjustedabspressure').innerText = adjusted_abs_pressure.toString();
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <div class="card">
+                    <div class="card-header">Parameters</div>
+                    <div class="card-body">
+                        <form onsubmit="generateInstructions()">
+                            <div class="form-group">
+                                <label for="consoleElevation">Console Elevation</label>
+                                <input type="number" class="form-control" id="consoleElevation" aria-describedby="consoleElevationHelp" step="0.01" required>
+                                <small id="consoleElevationHelp" class="form-text text-muted">Elevation of the WS-2902 Console in Meters.</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="consoleRelPressure">Current Relative Pressure</label>
+                                <input type="number" class="form-control" id="consoleRelPressure" aria-describedby="consoleRelPressureHelp" step="0.1" required>
+                                <small id="consoleRelPressureHelp" class="form-text text-muted">Current Relative Pressure displayed by WS-2902 Console in hPa.</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="consoleAbsPressure">Current Absolute Pressure</label>
+                                <input type="number" class="form-control" id="consoleAbsPressure" aria-describedby="consoleAbsPressureHelp" step="0.1" required>
+                                <small id="consoleAbsPressureHelp" class="form-text text-muted">Current Absolute Pressure displayed by WS-2902 Console in hPa.</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="metarSLP">Nearest METAR Sea Level Pressure</label>
+                                <input type="number" class="form-control" id="metarSLP" aria-describedby="metarSLPHelp" step="0.1" required>
+                                <small id="metarSLPHelp" class="form-text text-muted">Current Sea Level Pressure by the nearest METAR station.<br><br>
+                                    Use the map at <a href="https://aviationweather.gov/metar">https://aviationweather.gov/metar</a> to find the closest METAR station near you.<br>
+                                    Once found, enter the ID of the local METAR station below the map, click on Decoded for the "Format", and then click "Get METAR Station".<br>
+                                    Look for "Pressure(altimeter)" and then type the value for "Sea Level Pressure" in this box.</small>
+                            </div>
+                            <button class="btn btn-success">Generate Instructions</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="instructions" class="row" style="display: none">
+            <div class="col">
+                <div class="card">
+                    <div class="card-header">Instructions</div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col">
+                                <div class="card" id="step1">
+                                    <div class="card-header">Step 1</div>
+                                    <div class="card-body">
+                                        <div id="step1skip">
+                                            The console is properly calibrated based elevation. Skipping this step.
+                                        </div>
+                                        <div id="step1noskip">
+                                            In this step, the relative pressure offset needs to be adjusted to match the console's elevation.<br>
+                                            Press and hold the [SET] button for two seconds to enter "SET" mode.<br>
+                                            Press the [SET] button <b>11</b> times to arrive at the "Relative Pressure Calibration" mode.<br>
+                                            <div id="step1increment">
+                                                Press the [WIND +] button <span id="step1incrementbuttontimes"></span> time(s) to increment the relative pressure by <span id="step1incrementoffset"></span> hPa.<br>
+                                            </div>
+                                            <div id="step1decrement">
+                                                Press the [PRESSURE -] button <span id="step1decrementbuttontimes"></span> time(s) to decrement the relative pressure by <span id="step1decrementoffset"></span> hPa.<br>
+                                            </div>
+                                            The relative pressure on the console should now read <span id="step1adjustedrelpressure"></span> hPa.<br><br>
+
+                                            Press the [SET] button <b>6</b> more times to leave "SET" mode.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <div class="card" id="step2">
+                                    <div class="card-header">Step 2</div>
+                                    <div class="card-body">
+                                        <div id="step2skip">
+                                            The console is properly calibrated to the nearest METAR station. Skipping this step.<br><br>
+                                        </div>
+                                        <div id="step2noskip">
+                                            In this step, the absolute pressure offset needs to be adjusted to match the nearest METAR pressure.<br>
+                                            Press and hold the [TEMP.] and [MIN/MAX] buttons at the same time for five seconds to enter "calibration" mode.<br>
+                                            Press the [SET] button <b>4</b> times to arrive at the "Absolute Pressure Calibration" mode.<br>
+                                            <div id="step2increment">
+                                                Press the [WIND +] button <span id="step2incrementbuttontimes"></span> time(s) to increment the absolute pressure by <span id="step2incrementoffset"></span> hPa.<br>
+                                            </div>
+                                            <div id="step2decrement">
+                                                Press the [PRESSURE -] button <span id="step2decrementbuttontimes"></span> time(s) to decrement the absolute pressure by <span id="step2decrementoffset"></span> hPa.<br>
+                                            </div>
+                                            The absolute pressure on the console should now read <span id="step2adjustedabspressure"></span> hPa.<br><br>
+
+                                            Press the [SET] button <b>8</b> more times to leave "calibration" mode.<br><br>
+                                        </div>
+                                        The WS-2902 console is now calibrated correctly based on elevation and local METAR reporting.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <div class="blockquote-footer">
+                    <br>
+                    Calculator created by <a href="https://github.com/Caboose700">Chase Tarson</a><br>
+                    Credit to <a href="https://www.wxforum.net/index.php?action=profile;u=15434">galfert</a> on <a href="https://www.wxforum.net/index.php">https://www.wxforum.net/</a> for insight and methodology.<br>
+                    Original thread can be found <a href="https://www.wxforum.net/index.php?topic=39088.0">here</a>.
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
