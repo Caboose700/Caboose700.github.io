@@ -143,32 +143,30 @@
                 <div class="card">
                     <div class="card-header">Parameters</div>
                     <div class="card-body">
-                        <form onsubmit="generateInstructions()">
-                            <div class="form-group">
-                                <label for="consoleElevation">Console Elevation</label>
-                                <input type="number" class="form-control" id="consoleElevation" aria-describedby="consoleElevationHelp" step="0.01" required>
-                                <small id="consoleElevationHelp" class="form-text text-muted">Elevation of the WS-2902 Console in Meters.</small>
-                            </div>
-                            <div class="form-group">
-                                <label for="consoleRelPressure">Current Relative Pressure</label>
-                                <input type="number" class="form-control" id="consoleRelPressure" aria-describedby="consoleRelPressureHelp" step="0.1" required>
-                                <small id="consoleRelPressureHelp" class="form-text text-muted">Current Relative Pressure displayed by WS-2902 Console in hPa.</small>
-                            </div>
-                            <div class="form-group">
-                                <label for="consoleAbsPressure">Current Absolute Pressure</label>
-                                <input type="number" class="form-control" id="consoleAbsPressure" aria-describedby="consoleAbsPressureHelp" step="0.1" required>
-                                <small id="consoleAbsPressureHelp" class="form-text text-muted">Current Absolute Pressure displayed by WS-2902 Console in hPa.</small>
-                            </div>
-                            <div class="form-group">
-                                <label for="metarSLP">Nearest METAR Sea Level Pressure</label>
-                                <input type="number" class="form-control" id="metarSLP" aria-describedby="metarSLPHelp" step="0.1" required>
-                                <small id="metarSLPHelp" class="form-text text-muted">Current Sea Level Pressure by the nearest METAR station.<br><br>
-                                    Use the map at <a href="https://aviationweather.gov/metar">https://aviationweather.gov/metar</a> to find the closest METAR station near you.<br>
-                                    Once found, enter the ID of the local METAR station below the map, click on Decoded for the "Format", and then click "Get METAR Station".<br>
-                                    Look for "Pressure(altimeter)" and then type the value for "Sea Level Pressure" in this box.</small>
-                            </div>
-                            <button class="btn btn-success">Generate Instructions</button>
-                        </form>
+                        <div class="form-group">
+                            <label for="consoleElevation">Console Elevation</label>
+                            <input type="number" class="form-control" id="consoleElevation" aria-describedby="consoleElevationHelp" step="0.01" required>
+                            <small id="consoleElevationHelp" class="form-text text-muted">Elevation of the WS-2902 Console in Meters.</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="consoleRelPressure">Current Relative Pressure</label>
+                            <input type="number" class="form-control" id="consoleRelPressure" aria-describedby="consoleRelPressureHelp" step="0.1" required>
+                            <small id="consoleRelPressureHelp" class="form-text text-muted">Current Relative Pressure displayed by WS-2902 Console in hPa.</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="consoleAbsPressure">Current Absolute Pressure</label>
+                            <input type="number" class="form-control" id="consoleAbsPressure" aria-describedby="consoleAbsPressureHelp" step="0.1" required>
+                            <small id="consoleAbsPressureHelp" class="form-text text-muted">Current Absolute Pressure displayed by WS-2902 Console in hPa.</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="metarSLP">Nearest METAR Sea Level Pressure</label>
+                            <input type="number" class="form-control" id="metarSLP" aria-describedby="metarSLPHelp" step="0.1" required>
+                            <small id="metarSLPHelp" class="form-text text-muted">Current Sea Level Pressure by the nearest METAR station.<br><br>
+                                Use the map at <a href="https://aviationweather.gov/metar">https://aviationweather.gov/metar</a> to find the closest METAR station near you.<br>
+                                Once found, enter the ID of the local METAR station below the map, click on Decoded for the "Format", and then click "Get METAR Station".<br>
+                                Look for "Pressure(altimeter)" and then type the value for "Sea Level Pressure" in this box.</small>
+                        </div>
+                        <button class="btn btn-success" onclick="generateInstructions()">Generate Instructions</button>
                     </div>
                 </div>
             </div>
