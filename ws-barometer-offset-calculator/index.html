@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Weather Station Barometer Adjustment Helper</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <script>
+        function calculateOffsetBasedOnElevation(con_elevation)
+        {
+            let adj_sea_level = 1013.25 * Math.pow((1 - ((0.0065 * con_elevation) / (15 + (0.0065 * con_elevation) + 273.15))), 5.257);
+            return Number(1013.25 - adj_sea_level).toFixed(1);
+        }
+
+        function calculateCurrentConsoleOffset(con_absp, con_relp)
+        {
+            return Number(con_relp - con_absp).toFixed(1);
+        }
+
+        function calculateOffsetAdjustment(desired, current)
+        {
+            if (current > desired)
+            {
+                return ['-', Number(current - desired).toFixed(1)];
+            }
+            else if (current < desired)
+            {
+                return ['+', Number(desired - current).toFixed(1)];
+            }
+            else
+            {
+                return ['|', 0];
+            }
+        }
+
+        function generateInstructions()
+        {
+            // Get Form Values
+            let console_elevation = Number(document.getElementById('consoleElevation').value);
+            let console_abs_pressure = Number(document.getElementById('consoleAbsPressure').value);
+            let console_rel_pressure = Number(document.getElementById('consoleRelPressure').value);
+            let metar_sl_pressure = Number(document.getElementById('metarSLP').value);
+
+            // Determine Offsets
+            let desired_offset_from_elevation = calculateOffsetBasedOnElevation(console_elevation);
+            let current_console_offset = calculateCurrentConsoleOffset(console_abs_pressure, console_rel_pressure);
+            let required_offset_adjustment = calculateOffsetAdjustment(desired_offset_from_elevation, current_console_offset);
+
+            // Step 1 Calculations
+            let adjusted_rel_pressure = Number(console_rel_pressure);
+
+            if (required_offset_adjustment[0] === '+')
+            {
+                adjusted_rel_pressure += Number(required_offset_adjustment[1]);
+            }
+            else if (required_offset_adjustment[0] === '-')
+            {
+                adjusted_rel_pressure -= Number(required_offset_adjustment[1]);
+            }
+
+            // Step 2 Calculations
+            let metar_difference = calculateOffsetAdjustment(metar_sl_pressure, adjusted_rel_pressure);
+
+            // Show Instructions
+            document.getElementById('instructions').style.display = 'block';
+
+            // Setup Step 1
+            if (required_offset_adjustment[0] === '|')
+            {
+                // No adjustments need to be made, so hide the steps.
+                document.getElementById('step1noskip').style.display = 'none';
+                document.getElementById('step1skip').style.display = 'block';
+            }
+            else
+            {
+                document.getElementById('step1noskip').style.display = 'block';
+                document.getElementById('step1skip').style.display = 'none';
+
+                document.getElementById('step1offset').innerText = required_offset_adjustment[0] +
+                    required_offset_adjustment[1].toString();
+                document.getElementById('step1adjustedrelpressure').innerText = adjusted_rel_pressure.toString();
+            }
+
+            // Setup Step 2
+            // Determine if we show the instructions for incrementing or decrementing the adjustment.
+            if (metar_difference[0] === '|')
+            {
+                // No adjustments need to be made, so hide the steps.
+                document.getElementById('step2noskip').style.display = 'none';
+                document.getElementById('step2skip').style.display = 'block';
+            }
+            else
+            {
+                document.getElementById('step2noskip').style.display = 'block';
+                document.getElementById('step2skip').style.display = 'none';
+
+                document.getElementById('step2offset').innerText = metar_difference[0] + metar_difference[1];
+                document.getElementById('step2adjustedabspressure').innerText = metar_sl_pressure.toString();
+            }
+        }
+    </script>
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <div class="card">
+                <div class="card-header">Parameters</div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label for="consoleElevation">Console Elevation</label>
+                        <input type="number" class="form-control" id="consoleElevation" aria-describedby="consoleElevationHelp" step="0.01" required>
+                        <small id="consoleElevationHelp" class="form-text text-muted">Elevation of the barometer in meters.</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="consoleRelPressure">Current Relative Pressure</label>
+                        <input type="number" class="form-control" id="consoleRelPressure" aria-describedby="consoleRelPressureHelp" step="0.1" required>
+                        <small id="consoleRelPressureHelp" class="form-text text-muted">Current relative pressure displayed by the barometer in hPa.</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="consoleAbsPressure">Current Absolute Pressure</label>
+                        <input type="number" class="form-control" id="consoleAbsPressure" aria-describedby="consoleAbsPressureHelp" step="0.1" required>
+                        <small id="consoleAbsPressureHelp" class="form-text text-muted">Current absolute pressure displayed by the barometer in hPa.</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="metarSLP">Nearest METAR Sea Level Pressure</label>
+                        <input type="number" class="form-control" id="metarSLP" aria-describedby="metarSLPHelp" step="0.1" required>
+                        <small id="metarSLPHelp" class="form-text text-muted">Current Sea Level Pressure by the nearest METAR station.<br><br>
+                            Use the map at<a href="https://aviationweather.gov/metar">https://aviationweather.gov/metar</a> to find the closest METAR station near you.<br>
+                            Once found, enter the ID of the local METAR station below the map, click on Decoded for the "Format", and then click "Get METAR Station".<br>
+                            Look for "Pressure(altimeter)" and then type the value for "Sea Level Pressure" in this box.</small>
+                    </div>
+                    <button class="btn btn-success" onclick="generateInstructions()">Generate Instructions</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="instructions" class="row" style="display: none">
+        <div class="col">
+            <div class="card">
+                <div class="card-header"><b>Applying Offsets (Read Before Proceeding)</b></div>
+                <div class="card-body">
+                    Before applying any offsets, switch the weather system to display pressure in hPa, as it is more precise.<br>
+                    Once the weather station is calibrated, the unit can be changed back to inHg if preferred.<br><br>
+
+                    Depending on the weather station, the offsets need to be applied differently.<br><br>
+                    <ul>
+                        <li>
+                            <b>WS-2000 / GW1000:</b>
+                            The offset adjustments for Step 1 and Step 2 need to be done separately.
+                            Make the change for Step 1, then exit out of the calibration settings.
+                            Then re-enter the calibration settings for Step 2.
+                            Failure to do so will result in errors, as the system does not save the offset adjustment without leaving the calibration settings.
+                        </li>
+                        <li>
+                            <b>WS-2902:</b> For Step 1, the offset needs to be applied to the relative pressure. For Step 2, the offset needs to be applied to the absolute pressure.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">Instructions</div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col">
+                            <div class="card" id="step1">
+                                <div class="card-header">Step 1</div>
+                                <div class="card-body">
+                                    <div id="step1skip">
+                                        The weather station barometer is properly calibrated based on elevation.
+                                        No adjustments are needed.
+                                    </div>
+                                    <div id="step1noskip">
+                                        In this step, the relative pressure offset needs to be adjusted to match the console's elevation.<br><br>
+
+                                        Based on the values provided, the weather station's barometer needs to have an offset of <span id="step1offset"></span> hPa applied.<br><br>
+
+                                        Once the offset has been applied, the weather station should now report the relative pressure as <span id="step1adjustedrelpressure"></span> hPa.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="card" id="step2">
+                                <div class="card-header">Step 2</div>
+                                <div class="card-body">
+                                    <div id="step2skip">
+                                        The weather station is properly calibrated to the nearest METAR station.
+                                        No adjustments are needed.<br><br>
+                                    </div>
+                                    <div id="step2noskip">
+                                        In this step, the pressure needs to be adjusted to line up with the closest METAR station.<br><br>
+
+                                        Based on the values provided, the weather station's barometer needs to have an offset of <span id="step2offset"></span> hPa applied to line up with the nearest METAR station.<br><br>
+
+                                        Once the offset has been applied, the weather station should now report the relative pressure as <span id="step2adjustedabspressure"></span> hPa.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="card" id="step3">
+                                <div class="card-header">Step 3</div>
+                                <div class="card-body">
+                                    Now that the offsets have been applied to the weather station, double check the values and ensure they are still correct.
+                                    Depending on how long it may have taken to apply the offsets, the pressure may have changed, so a double check is crucial to ensure accuracy.<br><br>
+
+                                    Over the next several days, compare the weather station numbers with the local METAR station to identify if any further adjustments are required.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="blockquote-footer">
+                <br>
+                Calculator created by <a href="https://github.com/Caboose700">Chase Tarson</a><br>
+                Credit to <a href="https://www.wxforum.net/index.php?action=profile;u=15434">galfert</a> on <a href="https://www.wxforum.net/index.php">https://www.wxforum.net/</a> for insight and methodology.<br>
+                Original thread can be found <a href="https://www.wxforum.net/index.php?topic=39088.0">here</a>.
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
