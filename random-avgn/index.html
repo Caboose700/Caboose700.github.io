@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Random AVGN</title>
+    <script>
+        Array.prototype.random = function () {
+            return this[Math.floor((Math.random()*this.length))];
+        }
+
+        const videos = [
+            'wPG4s1jT01U','QYlAed4EaPc','f5zyhC11hzQ','R-GWV2HrW0c','Fg1oKKz7NOw','-XtToNPFU1E','7CixRRG64HM',
+            'a9io5dyRvmI','JvHtXn7uQ6I','Sqif27k-_Hg','UDumOYP0ZA0','jNNR1KOufqI','3KC_h3VkXbI','ghAbmH7To-w',
+            'Y66vEfEiPBM','0aT4w2Q1BrU','WF9eUXKgzCA','YPoBMzAkZZM','3BwciKSEhv4','IMrqAEwEpNE','WPVwsiTdDHA',
+            'ZJAKd4hg_m0','hH_2gfxCBQk','2zYLntVHGRw','yGbkLG1b8WA','AtbhSRCR7S0','6144EJIDj94','PnceSzQ-CpI',
+            'wm9J8o6zrSI','1YQYPIV9-sY','bTtuohRoXNY','WCUtXD27UyQ','ldC4hw8AJ2c','fuOmmIOdPg8','VYpryVA5WQQ',
+            'KvGxHuEUXgs','kY_r6u8YNEU','15pi8vrUx9c','Vg0y9i5E7nY','GKp3V1PiELk','LBFjpE1BaXk','VdVP2XxV3QU',
+            'vnnf42BQTfo','PPKqp3H8xic','-LpJnN9Imbg','shwFNKP_mI4','tKqRz64eQD4','HfnNrISCFfk','HOccLSB9EU8',
+            'n5yQk7y20oY','3oqktia7NLI','jVybGgvGMlk','O14og3hXook','LZ5nX0FTH6Q','KKjodfe0lgE','iA2borlKZA4',
+            '98Vch_OsyZI','H2v5SqQYTtQ','x4hktqhBpzY','OOwfl8yY7nc','ft0aqF_Yc0A','EEzJH90h3aA','zbAoITuMqg4',
+            'Sr_rd6DpxM0','dJSpUUITpQA','Ht5NmRtWb88','A0YzkTFmq1k','LB3CybXl8rs','atZ9-MxVPNM','5oH0rzY5zOA',
+            'Q3iEn5rzMnw','zCRDLccnYFo','yVJcaP5lAC8','-IV8hCvsXy0','x3cewR_sMYI','M_aXcH1zDEE','A5TUJae9CxM',
+            'TCcB0iUvU_Y','lzt_uoTVAcE','0rGW_Vidtmg','8cLHh-ka7X8','_HXZgKO8w4E','C2qGlSrKvJw','fRqdHj1vtV8',
+            'm3Qhrs_Uh1c','-ODebhGtiHs','UVf9-wEzGvc','8-zEhhTqdvg','uKFgXGO51rU','WUsQmYRfynw','RFi2vcseEz8',
+            'h6DtVHqyYts','ONYyFiKjJ20','OwGDVMptn8k','WEz0IoffV9g','RwlfLMs46YA','_u5dtBtG9yU','1A5B8fXp0aU',
+            'ZcuxGRO1wQA','bByE7n2AJj4','0Oem60yvtUY','94Y6y1MOoEo','0Ta-4H92CkA','Kz0TOQ1BF-M','y4-7mWeY_Cs',
+            'fs2wczJXETM','5BqCAOGRR2Q','jfnSqLzUzfM','DB9GM-a7lR0','vBjejMlyxLk','F2bKVEVUOPg','iSjq4Am-5Aw',
+            'iMINBv_Dqvs','w2ZX_ToJHFk','EjXn5qiM8Zw','sDBfNTf4ORY','Fz92prJ3XlM','HdWRTleizFU','hwmoJkHS-2E',
+            'a4QBeADNM34','FvT8jG1OVdI','LWltQ9UN5vE','6t2YvyLqw3c','nFOf70RyERU','gU21wBNSVWU','QGrHqz3opgM',
+            'NEwgFmL31RQ','Hfo6hoN0PUw','UrLdIiW6bEo','4C0xI41RtaU','sSoQWmcr5mc','2cWGZkK-KsY','C8mQHotlaFo',
+            'FJEXpsDB2XQ','wai9CnvatBo','DyaF_gCKWsI','69ybxGPnuag','km9vYa2GIUI','24sBGjAAWEY','rmq6bCVD4V8',
+            '-LKK-6bmDgQ','kDAKxjG7VaI','bHyTzPtEAhk','CGEGon-Qc_Q','3LVcvkLCUtU','kMz7JkVplpM','zk1C0AhshtU',
+            '_dUVZozf-i0','tl2Wz1qlzco','xLxqfmpjB-U','eHcoOLMXono','sDR8HKC9wgI','cOfHlihgOn0','t9nxIUhZCCw',
+            'UD7k4mTThLY','cgCSbOy4mNU','JFvtk5toGJg','Dvs6JDSBqoE','1dJXgJ1c4vY','9NyWqiHQs7c','1CNddEz9dak',
+            '7O82pX2XQIQ','9kBMscW_dVg','YWRzXAtDgN0','4yn52NTdV0c','rBMO8F1I-h4','HTLUOgP21UY','OyVAp0tOk5A',
+            'ttd_HcgaoXQ','cHIP9UtkQDQ','CyqK8wqwYmc','l7XIbwtMl4Y','00xIvTOLrYA','a0G_8gHDsL8','bVtwVXMPBY8',
+            'B0iwC58K6t0','eegQI9WM6mk','M1tU61Nyv1w','mKnl0CvfeLs','t475kPIEXPg','RL0YWB8wMDs','gvnRBywkUZ0',
+            'g2eH3vYbdGo','VvR_3OTxs8A','omW1E7rv7IM','TLVGmvmNitg','qF2snKCmqJo','kZfq-IPlLF8','AknyR-kRvLc',
+            'KoLrymTT2co','LkNvQYiM6bw','v7poR6G3hec','OEVzPCY2T-g','MYDuy7wM8Gk','1raUvGNbZFg','3p713bNaO4A',
+            'kMg6_IXCjo4','ofM11nPzFo0','sayp5lieKuU','QVS0Uks4ZUw','qVBerX6Dzmc','y306cWw98a4','XjUz8IT0CYg',
+            'l-6WakV0kWM','9DfdRdOM_B0','6M_4Yqk65f8','V4we8iFk-fY'
+        ]
+
+        window.location = 'https://www.youtube.com/watch?v=' + videos.random()
+    </script>
+</head>
+<body>
+
+</body>
+</html>
